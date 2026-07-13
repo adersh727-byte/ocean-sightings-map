@@ -63,17 +63,41 @@ const Map = () => {
         </div>
 
         <div className="max-w-4xl mx-auto">
-          <Card className="mb-6">
+          <Card className="mb-6 overflow-hidden">
             <CardHeader>
-              <CardTitle>Interactive Map (Coming Soon)</CardTitle>
+              <CardTitle>Interactive Map</CardTitle>
               <CardDescription>
-                We're working on integrating an interactive map. For now, view all locations below.
+                Explore reported debris locations around the world
               </CardDescription>
             </CardHeader>
-            <CardContent className="bg-muted/50 h-96 rounded-lg flex items-center justify-center">
-              <div className="text-center">
-                <MapPin className="h-16 w-16 mx-auto text-muted-foreground mb-4" />
-                <p className="text-muted-foreground">Map visualization coming soon</p>
+            <CardContent className="p-0">
+              <div className="h-[500px] w-full">
+                <MapContainer
+                  center={reports.length ? [reports[0].latitude, reports[0].longitude] : [20, 0]}
+                  zoom={reports.length ? 5 : 2}
+                  scrollWheelZoom
+                  style={{ height: "100%", width: "100%" }}
+                >
+                  <TileLayer
+                    attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+                    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                  />
+                  {reports.map((r) => (
+                    <Marker key={r.id} position={[r.latitude, r.longitude]}>
+                      <Popup>
+                        <div className="space-y-1">
+                          <h3 className="font-semibold">{r.title}</h3>
+                          {r.description && <p className="text-sm">{r.description}</p>}
+                          {r.debris_type && (
+                            <p className="text-xs capitalize text-muted-foreground">
+                              Type: {r.debris_type}
+                            </p>
+                          )}
+                        </div>
+                      </Popup>
+                    </Marker>
+                  ))}
+                </MapContainer>
               </div>
             </CardContent>
           </Card>
