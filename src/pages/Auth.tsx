@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -11,6 +11,17 @@ import Navbar from "@/components/Navbar";
 import { Waves } from "lucide-react";
 
 const Auth = () => {
+  useEffect(() => {
+    // Redirect signed-in users away from the auth page
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_e, session) => {
+      if (session?.user) navigate("/report");
+    });
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session?.user) navigate("/report");
+    });
+    return () => subscription.unsubscribe();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -24,6 +35,9 @@ const Auth = () => {
     const { error } = await supabase.auth.signUp({
       email,
       password,
+      options: {
+        emailRedirectTo: `${window.location.origin}/`,
+      },
     });
 
     setLoading(false);
